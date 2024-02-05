@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ArtifactsWorkspaceSettings">
+    <artifacts-to-build>
+      <artifact name="record:jar" />
+    </artifacts-to-build>
+  </component>
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="b88fab67-0261-4c2a-8cbc-f65bad06be6a" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/artifacts/record_jar.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/artifacts/record_jar2.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/uiDesigner.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/Main.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/controller/ApiController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/io/agora/recording/RecordingEventHandler.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/io/agora/recording/RecordingSDK.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/io/agora/recording/common/Common.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/io/agora/recording/common/RecordingConfig.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/io/agora/recording/common/RecordingEngineProperties.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/io/agora/recording/test/RecordingCleanTimerL.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/application.yml" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Enum" />
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="MavenImportPreferences">
+    <option name="generalSettings">
+      <MavenGeneralSettings>
+        <option name="mavenHome" value="D:/maven/apache-maven-3.9.6" />
+        <option name="userSettingsFile" value="D:\maven\apache-maven-3.9.6\conf\settings.xml" />
+      </MavenGeneralSettings>
+    </option>
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 7
+}</component>
+  <component name="ProjectId" id="2SMerD2Kloguqma4uTbqI5JP56i" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
+    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
+    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
+    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;last_opened_file_path&quot;: &quot;H:/Agora/MyRecord&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Artifacts&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;MavenSettings&quot;,
+    &quot;spring.configuration.checksum&quot;: &quot;de17f0f24b49f8364187891f8550ffbb&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="RecentsManager">
+    <key name="CreateClassDialog.RecentsKey">
+      <recent name="com.example.bean" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\dev\pro\record\src\main\java\com\doda\agora\test" />
+      <recent name="D:\dev\pro\record\src\main\java\com\doda\agora" />
+      <recent name="D:\dev\pro\record\src\main\java\com\doda\agora\common" />
+    </key>
+    <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="com.doda.agora.utils" />
+      <recent name="com.doda.controller" />
+      <recent name="com.doda.agora.pojo" />
+      <recent name="com.doda.agora.test" />
+      <recent name="com.doda.agora" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Spring Boot.Main">
+    <configuration name="RecordingSampleM" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="com.doda.agora.test.RecordingSampleM" />
+      <module name="record" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.doda.agora.test.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Main" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" temporary="true" nameIsGenerated="true">
+      <module name="record" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.example.Main" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.example.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Spring Boot.Main" />
+        <item itemvalue="Application.RecordingSampleM" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="b88fab67-0261-4c2a-8cbc-f65bad06be6a" name="Changes" comment="" />
+      <created>1688961075569</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1688961075569</updated>
+      <workItem from="1688961076622" duration="21946000" />
+      <workItem from="1689125552238" duration="7731000" />
+      <workItem from="1689217166644" duration="9113000" />
+      <workItem from="1689297770892" duration="2325000" />
+      <workItem from="1691999721914" duration="52000" />
+      <workItem from="1692083675728" duration="3723000" />
+      <workItem from="1692148029871" duration="1977000" />
+      <workItem from="1692235029113" duration="581000" />
+      <workItem from="1692270764434" duration="3411000" />
+      <workItem from="1692407444246" duration="1666000" />
+      <workItem from="1692493177597" duration="3030000" />
+      <workItem from="1692609399374" duration="1361000" />
+      <workItem from="1692667804383" duration="1264000" />
+      <workItem from="1693383819538" duration="7827000" />
+      <workItem from="1693444628255" duration="9299000" />
+      <workItem from="1693618453009" duration="16752000" />
+      <workItem from="1693789803955" duration="9029000" />
+      <workItem from="1693894648634" duration="496000" />
+      <workItem from="1693895176224" duration="5995000" />
+      <workItem from="1694046029976" duration="1989000" />
+      <workItem from="1694437920281" duration="4059000" />
+      <workItem from="1694443276695" duration="6886000" />
+      <workItem from="1694450538888" duration="6312000" />
+      <workItem from="1697459411570" duration="891000" />
+      <workItem from="1697460624890" duration="2403000" />
+      <workItem from="1705218209035" duration="55453000" />
+      <workItem from="1706950344590" duration="10483000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
+  </component>
+</project>

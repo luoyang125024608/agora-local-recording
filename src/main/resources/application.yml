@@ -1,0 +1,28 @@
+# Tomcat
+server:
+  port: 6655
+
+# 声网服务配置
+agora:
+  domain: https://api.agora.io
+  appid:
+  key:
+  secret:
+  channel:
+  uid: 666
+  channelProfile: 0
+  appliteDir: /root/AgoraRecord/bin
+  recordFileRootDir: /home/agroa/tmp/
+  lowUdpPort: 40000
+  highUdpPort: 44000
+  triggerMode: 0
+  isAudioOnly: 0
+  isVideoOnly: 0
+  streamType: 0
+  autoSubscribe: 1
+
+spring:
+  mvc:
+    throw-exception-if-no-handler-found: true
+    static-path-pattern: /static/**
+
