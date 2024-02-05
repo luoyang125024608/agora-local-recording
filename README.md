@@ -15,6 +15,7 @@
    cd your-project
    ```
 2. Edit Configure
+   
    Replace the configuration file src/main/resources/application.yml  with your project values
 
    ```yml
@@ -47,7 +48,6 @@
    ```
 
 
-
 ### Interface Description
 
 
@@ -61,6 +61,8 @@
 
 
 ## 中文
+
+### 本地录制环境搭建参考：  [Agora 本地录制最全总结- 基于Java SDK](https://blog.csdn.net/lizhengze1117/article/details/136015902)
 
 ## 安装与运行
 1. 克隆项目到本地
@@ -96,7 +98,7 @@
    ```
 4. 部署运行
    ```bash
-   java -jar target/your-project.jar
+   java -jar target/your-project.jar &
    ```
 
 
