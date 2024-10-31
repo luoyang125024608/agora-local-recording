@@ -23,7 +23,7 @@ public class RecordingConfig {
 
     lowUdpPort = 40000;//40000;
     highUdpPort = 41000;//40004;
-    idleLimitSec = 300;
+    idleLimitSec = 60;
     captureInterval = 5;
     triggerMode = 0;
     audioIndicationInterval = 0;

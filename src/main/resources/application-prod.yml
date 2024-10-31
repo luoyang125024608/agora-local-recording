@@ -1,0 +1,7 @@
+
+
+# 声网服务配置
+agora:
+  appliteDir: /opt/java-app/agora-local-recording/bin
+  recordFileRootDir: /opt/java-app/tmp/
+

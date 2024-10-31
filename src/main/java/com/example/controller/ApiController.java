@@ -58,7 +58,9 @@ public class ApiController {
                 args = new String[] {
                         "--appId", appId,
                         "--channel", channel,
-                        "--uid", UID
+                        "--uid", UID,
+                        "--appliteDir", this.recordingRequest.getAppliteDir(),
+                        "--recordFileRootDir", this.recordingRequest.getRecordFileRootDir(),
                 };
                 System.out.println("Command line arguments: " + Arrays.toString(args));
             }

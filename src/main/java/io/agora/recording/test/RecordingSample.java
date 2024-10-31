@@ -820,21 +820,22 @@ public class RecordingSample implements RecordingEventHandler {
         }
         return true;
     }
+
     @Async
     public void createChannel(String[] args) {
         int uid = 0;
-        String appId ;
+        String appId = "";
         String channelKey = "";
-        String name;
+        String name = "";
         int channelProfile = 0;
 
         String decryptionMode = "";
         String secret = "";
         String mixResolution = "360,640,15,500";
 
-        int idleLimitSec = 5 * 70;// 300s
+        int idleLimitSec = 5 * 60;// 300s
 
-        String applitePath = "/root/AgoraRecord/bin";
+        String applitePath = "";
         String recordFileRootDir = "";
         String cfgFilePath = "";
         int proxyType = 1;
@@ -947,7 +948,6 @@ public class RecordingSample implements RecordingEventHandler {
         appId = String.valueOf(Appid);
         name = String.valueOf(Channel);
         applitePath = String.valueOf(AppliteDir);
-//        applitePath = "/root/AgoraRecord/bin";
 
         if (ChannelKey != null)
             channelKey = String.valueOf(ChannelKey);
@@ -1134,19 +1134,11 @@ public class RecordingSample implements RecordingEventHandler {
 
         // run jni event loop , or start a new thread to do it
         cleanTimer = new Timer();
-        boolean res=false;
-        try{
-            if (userAccount.length() > 0) {
-                RecordingSDKInstance.createChannelWithUserAccount(appId, channelKey, name, userAccount, config, logLevel);
-            } else {
-                res= RecordingSDKInstance.createChannel(appId, channelKey, name, uid, config, logLevel);
-            }
-        }catch (Exception e){
-            throw e;
-        }finally {
-            System.out.println(res);
+        if (userAccount.length() > 0) {
+            RecordingSDKInstance.createChannelWithUserAccount(appId, channelKey, name, userAccount, config, logLevel);
+        } else {
+            RecordingSDKInstance.createChannel(appId, channelKey, name, uid, config, logLevel);
         }
-
         cleanTimer.cancel();
         System.out.println("jni layer has been exited...");
     }

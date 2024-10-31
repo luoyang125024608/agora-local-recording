@@ -11,8 +11,8 @@ agora:
   channel:
   uid: 666
   channelProfile: 0
-  appliteDir: /root/AgoraRecord/bin
-  recordFileRootDir: /home/agroa/tmp/
+  appliteDir: /home/week/software/agora-local-recording/bin
+  recordFileRootDir: /home/week/software/tmp/
   lowUdpPort: 40000
   highUdpPort: 44000
   triggerMode: 0
