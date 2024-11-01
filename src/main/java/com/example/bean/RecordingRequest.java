@@ -13,27 +13,12 @@ public class RecordingRequest {
     private String channel;
     private String uid;
     private String channelProfile;
+    private String channelKey;
     private String appliteDir;
     private String recordFileRootDir;
     private String triggerMode;
     private String autoSubscribe;
     private String streamType;
-
-    public String[] toArgs() {
-        return new String[]{
-                "--appId", this.appId,
-                "--channel", this.channel,
-                "--uid", String.valueOf(this.uid),
-                "--channelProfile", String.valueOf(this.channelProfile),
-                "--appliteDir", this.appliteDir,
-                "--recordFileRootDir", this.recordFileRootDir,
-                "--triggerMode", this.triggerMode,
-                "--streamType", this.streamType,
-                "--autoSubscribe", this.autoSubscribe,
-                // 添加其他属性的映射
-
-        };
-    }
 
 }
 

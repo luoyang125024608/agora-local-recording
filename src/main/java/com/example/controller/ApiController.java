@@ -10,7 +10,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 
@@ -21,9 +24,7 @@ public class ApiController {
 
     private final RecordingRequest recordingRequest;
 
-    //lzz add
-    RecordingSDK RecordingSdk = new RecordingSDK();
-    RecordingSample ars = new RecordingSample(RecordingSdk);
+    private final Map<String, RecordingSample> records = new HashMap<String, RecordingSample>();
 
     @Autowired
     public ApiController(RecordingRequest recordingRequest) {
@@ -31,39 +32,39 @@ public class ApiController {
     }
 
     @GetMapping("/test")
-    public ResponseEntity<String> testController(){
-        return  ResponseEntity.ok("test ok");
-    }
-
-    @GetMapping("/getProp")
-    public  ResponseEntity<String> getPropController(){
-//        System.out.println("default setting is = "+ recordingRequest.toArgs());
-        return  ResponseEntity.ok("default setting is = "+ Arrays.toString(recordingRequest.toArgs()));
+    public ResponseEntity<String> testController() {
+        return ResponseEntity.ok("test ok");
     }
 
     @PostMapping("/start")
-    public ResponseEntity<String> startRecording(@RequestBody(required = false) RecordingRequest request) {
-        try{
+    public ResponseEntity<String> startRecording(@RequestBody RecordingRequest request) {
+        try {
             String[] args = new String[]{""};
-            // 请求体为空的逻辑，使用默认值
-            if (request == null) {
-                args = recordingRequest.toArgs();
-                System.out.println("default setting: " + Arrays.toString(args));
-            }else{
+            //lzz add
+            RecordingSDK RecordingSdk = new RecordingSDK();
+            RecordingSample ars = new RecordingSample(RecordingSdk);
 
-                String appId = request.getAppId();
-                String channel = request.getChannel();
-                String UID= request.getUid();
-                // Create the arguments array
-                args = new String[] {
-                        "--appId", appId,
-                        "--channel", channel,
-                        "--uid", UID,
-                        "--appliteDir", this.recordingRequest.getAppliteDir(),
-                        "--recordFileRootDir", this.recordingRequest.getRecordFileRootDir(),
-                };
-                System.out.println("Command line arguments: " + Arrays.toString(args));
+            String appId = request.getAppId();
+            String channel = request.getChannel();
+            String UID = request.getUid();
+            String channelKey = request.getChannelKey();
+
+            if(records.containsKey(channel)){
+                return ResponseEntity.status(HttpStatus.CONFLICT).body("recording already started");
             }
+            // Create the arguments array
+            args = new String[]{
+                    "--appId", appId,
+                    "--channel", channel,
+                    "--channelKey", channelKey,
+                    "--uid", UID,
+                    "--appliteDir", this.recordingRequest.getAppliteDir(),
+                    "--recordFileRootDir", this.recordingRequest.getRecordFileRootDir(),
+                    "--isMixingEnabled", "1",
+                    "--mixedVideoAudio", "6",
+            };
+            System.out.println("Command line arguments: " + Arrays.toString(args));
+            records.put(channel, ars);
 
             // 异步执行录制
             String[] finalArgs = args;
@@ -81,41 +82,32 @@ public class ApiController {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal Server Error: Recording start failed.");
             }
 
-        }catch (Exception ex) {
+        } catch (Exception ex) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal Server Error: " + ex.getMessage());
         }
 
     }
 
     @PostMapping("/stop")
-    public  ResponseEntity<String> stopController(){
+    public ResponseEntity<String> stopController(@RequestBody RecordingRequest request) {
         try {
+            String channel = request.getChannel();
+            if (records.containsKey(channel)) {
+                RecordingSample ars = records.get(channel);
+                boolean isStop = ars.leaveChannel();
 
-            boolean isStop = RecordingSdk.leaveChannel();
-
-            if (isStop) {
-                return ResponseEntity.ok("Recording stop successfully.");
+                if (isStop) {
+                    records.remove(channel);
+                    return ResponseEntity.ok("Recording stop successfully.");
+                } else {
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal Server Error: Recording stop failed.");
+                }
             } else {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal Server Error: Recording stop failed.");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Recording not exists.");
             }
+
         } catch (Exception ex) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal Server Error: " + ex.getMessage());
-        }
-    }
-
-
-
-    @GetMapping("/help")
-    public String getHelp() {
-        try {
-            StringBuilder helpMessage = new StringBuilder();
-            helpMessage.append("Type \"start\" to start recording! \n");
-            helpMessage.append("Type \"stop\" to stop recording! \n");
-            helpMessage.append("Type \"getProp\" to call get default Properties!\n");
-            helpMessage.append("Type \"test\" to test the server is online or not!\n");
-            return helpMessage.toString();
-        } catch (Exception ex) {
-            return "Error generating help message: " + ex.getMessage();
         }
     }
 }

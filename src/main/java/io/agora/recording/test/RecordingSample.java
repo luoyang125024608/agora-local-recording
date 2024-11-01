@@ -4,14 +4,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.FileNotFoundException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.HashSet;
-import java.util.Vector;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.Iterator;
+import java.util.*;
 
 import io.agora.recording.common.Common;
 import io.agora.recording.common.Common.AUDIO_FORMAT_TYPE;
@@ -68,7 +61,7 @@ public class RecordingSample implements RecordingEventHandler {
     private long count = 0;
     private long size = 0;
     private CHANNEL_PROFILE_TYPE profile_type;
-    Vector<Long> m_peers = new Vector<Long>();
+    Set<Long> m_peers = new HashSet<Long>();
     private RecordingConfig config = null;
     private RecordingSDK RecordingSDKInstance = null;
     private boolean m_receivingAudio = false;
@@ -105,6 +98,7 @@ public class RecordingSample implements RecordingEventHandler {
         ars.unRegister();
     }
 
+    public boolean leaveChannel() { return RecordingSDKInstance.leaveChannel();}
     public void unRegister(){
         RecordingSDKInstance.unRegisterOberserver(this);
     }
@@ -831,9 +825,9 @@ public class RecordingSample implements RecordingEventHandler {
 
         String decryptionMode = "";
         String secret = "";
-        String mixResolution = "360,640,15,500";
+        String mixResolution = "640,360,15,500";
 
-        int idleLimitSec = 5 * 60;// 300s
+        int idleLimitSec = 1 * 60;// 300s
 
         String applitePath = "";
         String recordFileRootDir = "";
@@ -847,7 +841,7 @@ public class RecordingSample implements RecordingEventHandler {
         String localAp = "";
 
 
-        int lowUdpPort = 0;// 40000;
+        int lowUdpPort = 0;// 40000;po
         int highUdpPort = 0;// 40004;
 
         boolean isAudioOnly = false;
@@ -982,7 +976,7 @@ public class RecordingSample implements RecordingEventHandler {
             isMixingEnabled = true;
         if (MixedVideoAudio != null)
             mixedVideoAudio = Integer.parseInt(String.valueOf(MixedVideoAudio));
-        if (!checkEnumValue(mixedVideoAudio, 2, "Invalid mixedVideoAudio :" + mixedVideoAudio)) {
+        if (!checkEnumValue(mixedVideoAudio, 7, "Invalid mixedVideoAudio :" + mixedVideoAudio)) {
             return;
         }
         if (GetAudioFrame != null)
