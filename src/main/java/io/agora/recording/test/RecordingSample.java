@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import com.example.bean.RecordingRequest;
 import io.agora.recording.common.Common;
 import io.agora.recording.common.Common.AUDIO_FORMAT_TYPE;
 import io.agora.recording.common.Common.AUDIO_FRAME_TYPE;
@@ -43,7 +44,7 @@ class RecordingCleanTimer extends TimerTask {
 
 class UserInfo{
     long uid;
-    long last_receive_time;
+    long lastReceiveTime;
     FileOutputStream channel;
     String fileName;
 }
@@ -60,7 +61,7 @@ public class RecordingSample implements RecordingEventHandler {
     private long aCount = 0;
     private long count = 0;
     private long size = 0;
-    private CHANNEL_PROFILE_TYPE profile_type;
+    private CHANNEL_PROFILE_TYPE profileType;
     Set<Long> m_peers = new HashSet<Long>();
     private RecordingConfig config = null;
     private RecordingSDK RecordingSDKInstance = null;
@@ -90,14 +91,6 @@ public class RecordingSample implements RecordingEventHandler {
         RecordingSDKInstance.registerOberserver(this);
     }
 
-    public static void main(String[] args) {
-        //should config -Djava.library.path to load library
-        RecordingSDK RecordingSdk = new RecordingSDK();
-        RecordingSample ars = new RecordingSample(RecordingSdk);
-        ars.createChannel(args);
-        ars.unRegister();
-    }
-
     public boolean leaveChannel() { return RecordingSDKInstance.leaveChannel();}
     public void unRegister(){
         RecordingSDKInstance.unRegisterOberserver(this);
@@ -107,54 +100,71 @@ public class RecordingSample implements RecordingEventHandler {
         return isMixMode;
     }
 
+    @Override
     public void onLeaveChannel(int reason) {
-        System.out.println("RecordingSDK onLeaveChannel,code:" + reason);
+        System.out.println("RecordingSDK onLeaveChannel, code: " + reason);
     }
 
-    public void onError(int error, int stat_code) {
-        System.out.println("RecordingSDK onError,error:" + error + ",stat code:" + stat_code);
+    @Override
+    public void onError(int error, int statCode) {
+        System.out.println("RecordingSDK onError, error: " + error + ", stat code: " + statCode);
         isRecordingError = true;
     }
 
+    @Override
     public void onWarning(int warn) {
         System.out.println("RecordingSDK onWarning,warn:" + warn);
     }
 
+    @Override
     public void onJoinChannelSuccess(String channelId, long uid) {
-        if(config.decodeAudio != AUDIO_FORMAT_TYPE.AUDIO_FORMAT_DEFAULT_TYPE) {
-            cleanTimer.schedule(new RecordingCleanTimer(this), 10000);
+        if (config.decodeAudio != AUDIO_FORMAT_TYPE.AUDIO_FORMAT_DEFAULT_TYPE) {
+            scheduleCleanTimer();
         }
-        System.out.println("RecordingSDK joinChannel success, channelId:" + channelId +", uid:" + uid);
+        System.out.println("RecordingSDK joinChannel success, channelId: " + channelId + ", uid: " + uid);
         isRecordingError = false;
     }
 
+    private void scheduleCleanTimer() {
+        if (cleanTimer != null) {
+            cleanTimer.cancel();
+        }
+        cleanTimer = new Timer();
+        cleanTimer.schedule(new RecordingCleanTimer(this), 10000);
+    }
+    @Override
     public void onRejoinChannelSuccess(String channelId, long uid) {
         System.out.println("onRejoinChannelSuccess, channel id : " + channelId + ", uid: " + uid);
         isRecordingError = false;
     }
 
+    @Override
     public void onConnectionStateChanged(CONNECTION_STATE_TYPE state, CONNECTION_CHANGED_REASON_TYPE reason) {
         System.out.println("onConnectioNStatsChanged, stats: " + state + ", reason: " + reason);
     }
 
+    @Override
     public void onRemoteAudioStats(long uid, RemoteAudioStats stats) {
     /*
     System.out.println("onRemoteAudioStats, quality: " + stats.quality + ", networkTransportDelay : " + stats.networkTransportDelay + ", jitterBufferDelay:" + stats.jitterBufferDelay + ", audio loss rate : " + stats.audioLossRate);
     */
     }
 
+    @Override
     public void onRemoteVideoStats(long uid, RemoteVideoStats stats) {
     /*
     System.out.println("onRemoteVideoStats, delay : " + stats.delay + ", width" + stats.width + ", height : " + stats.height + ", receivedBitrate:" + stats.receivedBitrate + ", decoderOutputFrameRate:" + stats.decoderOutputFrameRate + ", rxStreamType : " + stats.rxStreamType);
     */
     }
 
+    @Override
     public void onRecordingStats(RecordingStats stats) {
     /*
     System.out.println("onRecordingStats, duration : " + stats.duration + ", rxByets " + stats.rxBytes + ", rxKBitRate: " + stats.rxKBitRate + ", rxAudioKBitRate: " + stats.rxAudioKBitRate + ", rxVideoKBitRate:" + stats.rxVideoKBitRate + ", lastmileDelay : " + stats.lastmileDelay + ", userCount : " + stats.userCount + ", cpuAppUsage : " + stats.cpuAppUsage + ", cpuTotalUsage: " + stats.cpuTotalUsage);
     */
     }
 
+    @Override
     public void onUserOffline(long uid, int reason) {
         System.out.println("RecordingSDK onUserOffline uid:" + uid + ",offline reason:" + reason);
         m_peers.remove(uid);
@@ -163,47 +173,35 @@ public class RecordingSample implements RecordingEventHandler {
     }
 
     protected void clean() {
-        synchronized(this) {
-            long now = System.currentTimeMillis();
+        cleanChannels(audioChannels);
+        cleanChannels(videoChannels);
+        scheduleCleanTimer();
+    }
 
-            Iterator<Map.Entry<String, UserInfo>> audio_it = audioChannels.entrySet().iterator();
-            while(audio_it.hasNext()) {
-                Map.Entry<String, UserInfo> entry = audio_it.next();
-                UserInfo info = entry.getValue();
-                if(now - info.last_receive_time > 3000) {
-                    try{
-                        info.channel.close();
-                    }catch(IOException e) {
-                        e.printStackTrace();
-                    }
-                    audio_it.remove();
+    private void cleanChannels(Map<String, UserInfo> channels) {
+        long now = System.currentTimeMillis();
+        channels.values().removeIf(info -> {
+            if (now - info.lastReceiveTime > 3000) {
+                try {
+                    info.channel.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
+                return true;
             }
-            Iterator<Map.Entry<String, UserInfo>> video_it = videoChannels.entrySet().iterator();
-            while(video_it.hasNext()) {
-                Map.Entry<String, UserInfo> entry = video_it.next();
-                UserInfo info = entry.getValue();
-                if(now - info.last_receive_time > 3000 ) {
-                    try{
-                        info.channel.close();
-                    }catch(IOException e) {
-                        e.printStackTrace();
-                    }
-                    video_it.remove();
-                }
-            }
-        }
-        cleanTimer.schedule(new RecordingCleanTimer(this), 10000);
+            return false;
+        });
     }
 
 
+    @Override
     public void onUserJoined(long uid, String recordingDir) {
         System.out.println("onUserJoined uid:" + uid + ",recordingDir:" + recordingDir);
         storageDir = recordingDir;
         m_peers.add(uid);
         //PrintUsersInfo(m_peers);
         // When the user joined, we can re-layout the canvas
-        if (userAccount.length() > 0) {
+        if (!userAccount.isEmpty()) {
             if (layoutMode != VERTICALPRESENTATION_LAYOUT || RecordingSDKInstance.getUidByUserAccount(maxResolutionUserAccount) != 0) {
                 SetVideoMixingLayout();
             }
@@ -213,10 +211,12 @@ public class RecordingSample implements RecordingEventHandler {
         }
     }
 
+    @Override
     public void onLocalUserRegistered(long uid, String userAccount) {
         System.out.println("onLocalUserRegistered: " + uid + " => " + userAccount);
     }
 
+    @Override
     public void onUserInfoUpdated(long uid, String userAccount) {
         System.out.println("onUserInfoUpdated: " + uid + " => " + userAccount);
         if (subscribedVideoUserAccount.contains(userAccount)) {
@@ -226,66 +226,62 @@ public class RecordingSample implements RecordingEventHandler {
     }
 
 
+    @Override
     public void onRemoteVideoStreamStateChanged(long uid, REMOTE_STREAM_STATE state, REMOTE_STREAM_STATE_CHANGED_REASON reason) {
         //System.out.println("OnRemoteVideoStreamState changed, state " + state + ", reason :" + reason);
     }
 
+    @Override
     public void onRemoteAudioStreamStateChanged(long uid, REMOTE_STREAM_STATE state, REMOTE_STREAM_STATE_CHANGED_REASON reason) {
         //System.out.println("OnRemoteAudioStreamState changed, state " + state + ", reason :" + reason);
     }
 
     private void checkUser(long uid, boolean isAudio, int frameType) {
-        String path = storageDir + Long.toString(uid);
-        String key = Long.toString(uid);
-        synchronized(this) {
-            if(isAudio && !audioChannels.containsKey(key)) {
-                if(frameType == 0 || frameType == 1) {
-                    String audioPath = "";
-                    if(frameType == 0) {
-                        audioPath = path + ".pcm";
-                    } else if (frameType == 1) {
-                        audioPath = path + ".aac";
-                    }
-                    try {
-                        UserInfo info = new UserInfo();
-                        info.fileName = audioPath;
-                        info.channel = new FileOutputStream(audioPath, true);
-                        info.last_receive_time = System.currentTimeMillis();
-                        audioChannels.put(key, info);
-                    } catch(FileNotFoundException e) {
-                        System.out.println("Can't find file : " + audioPath);
-                    }
-                }
-            }
+        String path = storageDir + uid;
+        String key = String.valueOf(uid);
 
-            if (!isAudio && !videoChannels.containsKey(key)) {
-                if (frameType == 0 || frameType == 1 || frameType == 3) {
-                    String videoPath = "";
-                    if (frameType == 0) {
-                        videoPath = path + ".yuv";
-                    } else if (frameType == 1) {
-                        videoPath = path + ".h264";
-                    } else if (frameType == 3) {
-                        videoPath = path + ".h265";
-                    }
-                    try {
-                        UserInfo info = new UserInfo();
-                        info.fileName = videoPath;
-                        info.channel = new FileOutputStream(videoPath, true);
-                        info.last_receive_time = System.currentTimeMillis();
-                        videoChannels.put(key, info);
-                    } catch (FileNotFoundException e) {
-                        System.out.println("Can't find file : " + videoPath);
-                    }
-                }
-            }
+        if (isAudio) {
+            audioChannels.computeIfAbsent(key, k -> createUserChannel(uid, path, frameType, true));
+        } else {
+            videoChannels.computeIfAbsent(key, k -> createUserChannel(uid, path, frameType, false));
         }
     }
 
+    private UserInfo createUserChannel(long uid, String path, int frameType, boolean isAudio) {
+        String filePath;
+        switch (frameType) {
+            case 0:
+                filePath = isAudio ? path + ".pcm" : path + ".yuv";
+                break;
+            case 1:
+                filePath = isAudio ? path + ".aac" : path + ".h264";
+                break;
+            case 3:
+                filePath = path + ".h265";
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported frame type: " + frameType);
+        }
+
+        try {
+            UserInfo info = new UserInfo();
+            info.fileName = filePath;
+            info.channel = new FileOutputStream(filePath, true);
+            info.lastReceiveTime = System.currentTimeMillis();
+            return info;
+        } catch (FileNotFoundException e) {
+            System.out.println("Can't find file: " + filePath);
+            return null;
+        }
+    }
+
+
+    @Override
     public void onActiveSpeaker(long uid) {
         System.out.println("User:"+uid+"is speaking");
     }
 
+    @Override
     public void onReceivingStreamStatusChanged(boolean receivingAudio, boolean receivingVideo) {
         System.out.println("pre receiving audio status is " + m_receivingAudio + ", now receiving audio status is " + receivingAudio);
         System.out.println("pre receiving video status is " + m_receivingVideo + ", now receiving video  status is " + receivingVideo);
@@ -293,32 +289,38 @@ public class RecordingSample implements RecordingEventHandler {
         m_receivingVideo = receivingVideo;
     }
 
+    @Override
     public void onConnectionLost() {
         System.out.println("connection is lost");
     }
 
+    @Override
     public void onConnectionInterrupted() {
         System.out.println("connection is interrupted");
     }
 
+    @Override
     public void onAudioVolumeIndication(AudioVolumeInfo[] infos) {
-        if(infos.length == 0)
+        if(infos.length == 0){
             return;
-
+        }
         for(int i = 0; i < infos.length; i++) {
             System.out.println("User:"+ Long.toString(infos[i].uid)+", audio volume:" + infos[i].volume);
         }
     }
 
+    @Override
     public void onFirstRemoteVideoDecoded(long uid, int width, int height, int elapsed) {
         System.out.println("onFirstRemoteVideoDecoded User:"+ Long.toString(uid)+", width:" + width
                 + ", height:" + height + ", elapsed:" + elapsed);
     }
 
+    @Override
     public void onFirstRemoteAudioFrame(long uid, int elapsed) {
         System.out.println("onFirstRemoteAudioFrame User:"+ Long.toString(uid)+", elapsed:" + elapsed);
     }
 
+    @Override
     public void audioFrameReceived(long uid, AudioFrame frame) {
         // System.out.println("java demo
         // audioFrameReceived,uid:"+uid+",type:"+type);
@@ -334,26 +336,25 @@ public class RecordingSample implements RecordingEventHandler {
         } else {
             return;
         }
-        WriteBytesToFileClassic(uid, buf, size, true);
+        writeBytesToFile(uid, buf, true);
     }
 
+    @Override
     public void videoFrameReceived(long uid, int type, VideoFrame frame, int rotation)// rotation:0,90,180,270
     {
         byte[] buf = null;
-        long size = 0;
         checkUser(uid, false, type);
         // System.out.println("java demovideoFrameReceived,uid:"+uid+",type:"+type);
-
         if (type == 0) {// yuv
             buf = frame.yuv.buf;
-            size = frame.yuv.bufSize;
             if (buf == null) {
                 System.out.println("java demo videoFrameReceived null");
             }
-        } else if (type == 1) {// h264
+        } else if (type == 1) {
+            // h264
             buf = frame.h264.buf;
-            size = frame.h264.bufSize;
-        } else if (type == 2) {// jpg
+        } else if (type == 2) {
+            // jpg
             String path = storageDir + Long.toString(uid) + "_" + System.currentTimeMillis() + ".jpg";
             buf = frame.jpg.buf;
             size = frame.jpg.bufSize;
@@ -366,16 +367,17 @@ public class RecordingSample implements RecordingEventHandler {
             }
             System.out.println("java demovideoFrameReceived,uid:"+uid+",type:"+type+",path:"+path);
             return;
-        } else if (type == 3) { // h265
+        } else if (type == 3) {
+            // h265
             buf = frame.h265.buf;
-            size = frame.h265.bufSize;
-        } else if (type == 4) { // jpg
+        } else if (type == 4) {
+            // jpg
             System.out.println("java demovideoFrameReceived,uid:"+uid+",type:"+type+",jpg_file:"+frame.jpg_file.file_name);
             return;
         } else {
             return;
         }
-        WriteBytesToFileClassic(uid, buf, size, false);
+        writeBytesToFile(uid, buf, false);
     }
 
     /*
@@ -383,6 +385,7 @@ public class RecordingSample implements RecordingEventHandler {
      *
      * @param path recording file directory
      */
+    @Override
     public void recordingPathCallBack(String path) {
         storageDir = path;
     }
@@ -391,7 +394,7 @@ public class RecordingSample implements RecordingEventHandler {
         Common ei = new Common();
         Common.VideoMixingLayout layout = ei.new VideoMixingLayout();
         layout.keepLastFrame = this.keepLastFrame;
-        int max_peers = profile_type == CHANNEL_PROFILE_TYPE.CHANNEL_PROFILE_COMMUNICATION ? 7:17;
+        int max_peers = profileType == CHANNEL_PROFILE_TYPE.CHANNEL_PROFILE_COMMUNICATION ? 7:17;
         if(m_peers.size() > max_peers) {
             System.out.println("peers size is bigger than max m_peers:" + m_peers.size());
             return -1;
@@ -402,7 +405,7 @@ public class RecordingSample implements RecordingEventHandler {
         }
 
         long maxuid = 0;
-        if (userAccount.length() > 0) {
+        if (!userAccount.isEmpty()) {
             maxuid = RecordingSDKInstance.getUidByUserAccount(maxResolutionUserAccount);
         } else {
             maxuid = maxResolutionUid;
@@ -412,11 +415,12 @@ public class RecordingSample implements RecordingEventHandler {
         Iterator it = m_peers.iterator();
         while(it.hasNext()) {
             Long uid = (Long)it.next();
-            if (!config.autoSubscribe && !subscribedVideoUids.contains(uid))
+            if (!config.autoSubscribe && !subscribedVideoUids.contains(uid)) {
                 continue;
+            }
             if (layoutMode == VERTICALPRESENTATION_LAYOUT) {
                 String uc = RecordingSDKInstance.getUserAccountByUid((int)(long)uid);
-                if (uc.length() > 0 || maxuid != 0) {
+                if (!uc.isEmpty() || maxuid != 0) {
                     videoUids.add(uid);
                 }
             } else {
@@ -755,55 +759,41 @@ public class RecordingSample implements RecordingEventHandler {
         }
     }
 
-    private void WriteBytesToFileClassic(long uid, byte[] byteBuffer, long size, boolean isAudio) {
+    private void writeBytesToFile(long uid, byte[] byteBuffer, boolean isAudio) {
         if (byteBuffer == null) {
-            System.out.println("WriteBytesToFileClassic but byte buffer is null!");
+            System.out.println("writeBytesToFile but byte buffer is null!");
             return;
         }
-        synchronized(this) {
+
+        UserInfo info = (isAudio ? audioChannels : videoChannels).get(String.valueOf(uid));
+        if (info != null) {
             try {
-                UserInfo info = isAudio ? audioChannels.get(Long.toString(uid)) : videoChannels.get(Long.toString(uid));
-                if(info != null) {
-                    long curTs = System.currentTimeMillis();
-                    if (isAudio) {
-                        if (keepMediaTime > 0 && (curTs - lastKeepAudioTime)/1000 >= keepMediaTime) {
-                            // System.out.printf("rewrite audio file:%s\n", info.fileName);
-                            info.channel.close();
-                            info.channel = new FileOutputStream(info.fileName, false);
-                            lastKeepAudioTime = curTs;
-                        }
-                    } else {
-                        if (keepMediaTime > 0 && (curTs - lastKeepVideoTime)/1000 >= keepMediaTime) {
-                            // System.out.printf("rewrite video file:%s\n", info.fileName);
-                            info.channel.close();
-                            info.channel = new FileOutputStream(info.fileName, false);
-                            lastKeepVideoTime = curTs;
-                        }
-                    }
-                    info.channel.write(byteBuffer, 0, (int) size);
-                    info.channel.flush();
-                    info.last_receive_time = System.currentTimeMillis();
-                } else {
-                    System.out.println("Channel is null");
+                long currentTime = System.currentTimeMillis();
+                if (isTimeToRewrite(isAudio, currentTime)) {
+                    info.channel.close();
+                    info.channel = new FileOutputStream(info.fileName, false);
+                    updateLastKeepTime(isAudio, currentTime);
                 }
+                info.channel.write(byteBuffer);
+                info.channel.flush();
+                info.lastReceiveTime = currentTime;
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        } else {
+            System.out.println("Channel is null for uid: " + uid);
         }
     }
 
-    private String GetNowDate() {
-        String temp_str = "";
-        Date dt = new Date();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
-        temp_str = sdf.format(dt);
-        return temp_str;
+    private boolean isTimeToRewrite(boolean isAudio, long currentTime) {
+        return keepMediaTime > 0 && (currentTime - (isAudio ? lastKeepAudioTime : lastKeepVideoTime)) / 1000 >= keepMediaTime;
     }
 
-    private void PrintUsersInfo(Vector vector) {
-        System.out.println("user size:" + vector.size());
-        for (Long l : m_peers) {
-            System.out.println("user:" + l);
+    private void updateLastKeepTime(boolean isAudio, long currentTime) {
+        if (isAudio) {
+            lastKeepAudioTime = currentTime;
+        } else {
+            lastKeepVideoTime = currentTime;
         }
     }
 
@@ -816,324 +806,41 @@ public class RecordingSample implements RecordingEventHandler {
     }
 
     @Async
-    public void createChannel(String[] args) {
-        int uid = 0;
-        String appId = "";
-        String channelKey = "";
-        String name = "";
-        int channelProfile = 0;
-
-        String decryptionMode = "";
-        String secret = "";
-        String mixResolution = "640,360,15,500";
-
-        int idleLimitSec = 1 * 60;// 300s
-
-        String applitePath = "";
-        String recordFileRootDir = "";
-        String cfgFilePath = "";
-        int proxyType = 1;
-        String proxyServer = "";
-        String defaultVideoBgPath = "";
-        String defaultUserBgPath = "";
-        String subscribeVideoUids = "";
-        String subscribeAudioUids = "";
-        String localAp = "";
-
-
-        int lowUdpPort = 0;// 40000;po
-        int highUdpPort = 0;// 40004;
-
-        boolean isAudioOnly = false;
-        boolean isVideoOnly = false;
-        boolean isMixingEnabled = false;
-        boolean autoSubscribe = true;
-        boolean enableCloudProxy = false;
-        boolean enableIntraRequest = true;
-        boolean enableH265Support = false;
-        int mixedVideoAudio = MIXED_AV_CODEC_TYPE.MIXED_AV_DEFAULT.ordinal();
-
-        int getAudioFrame = AUDIO_FORMAT_TYPE.AUDIO_FORMAT_DEFAULT_TYPE.ordinal();
-        int getVideoFrame = VIDEO_FORMAT_TYPE.VIDEO_FORMAT_DEFAULT_TYPE.ordinal();
-        int streamType = REMOTE_VIDEO_STREAM_TYPE.REMOTE_VIDEO_STREAM_HIGH.ordinal();
-        int captureInterval = 5;
-        int triggerMode = 0;
-
-        int audioIndicationInterval = 0;
+    public void createChannel(RecordingRequest request) {
         int logLevel = 5;
-
-        int width = 0;
-        int height = 0;
-        int fps = 0;
-        int kbps = 0;
-        int count = 0;
-        int audioProfile = 0;
-
-        // paser command line parameters
-        if (args.length % 2 != 0) {
-            System.out.println("command line parameters error, should be '--key value' format!");
-            return;
-        }
-        String key = "";
-        String value = "";
-        Map<String, String> map = new HashMap<String, String>();
-        if (0 < args.length) {
-            for (int i = 0; i < args.length - 1; i++) {
-                key = args[i];
-                value = args[i + 1];
-                map.put(key, value);
-            }
-        }
-        // prefer to use CmdLineParser or annotation
-        Object Appid = map.get("--appId");
-        Object Channel = map.get("--channel");
-        Object AppliteDir = map.get("--appliteDir");
-        Object Uid = map.get("--uid");
-        Object UserAccount = map.get("--userAccount");
-        Object ChannelKey = map.get("--channelKey");
-        Object ChannelProfile = map.get("--channelProfile");
-        Object IsAudioOnly = map.get("--isAudioOnly");
-        Object IsVideoOnly = map.get("--isVideoOnly");
-        Object IsMixingEnabled = map.get("--isMixingEnabled");
-        Object MixResolution = map.get("--mixResolution");
-        Object MixedVideoAudio = map.get("--mixedVideoAudio");
-        Object DecryptionMode = map.get("--decryptionMode");
-        Object Secret = map.get("--secret");
-        Object Idle = map.get("--idle");
-        Object RecordFileRootDir = map.get("--recordFileRootDir");
-        Object LowUdpPort = map.get("--lowUdpPort");
-        Object HighUdpPort = map.get("--highUdpPort");
-        Object GetAudioFrame = map.get("--getAudioFrame");
-        Object GetVideoFrame = map.get("--getVideoFrame");
-        Object CaptureInterval = map.get("--captureInterval");
-        Object CfgFilePath = map.get("--cfgFilePath");
-        Object StreamType = map.get("--streamType");
-        Object TriggerMode = map.get("--triggerMode");
-        Object ProxyType = map.get("--proxyType");
-        Object ProxyServer = map.get("--proxyServer");
-        Object AudioProfile = map.get("--audioProfile");
-        Object AudioIndicationInterval = map.get("--audioIndicationInterval");
-        Object DefaultVideoBg = map.get("--defaultVideoBg");
-        Object DefaultUserBg = map.get("--defaultUserBg");
-        Object LogLevel = map.get("--logLevel");
-        Object LayoutMode = map.get("--layoutMode");
-        Object MaxResolutionUid = map.get("--maxResolutionUid");
-        Object MaxResolutionUserAccount = map.get("--maxResolutionUserAccount");
-        Object AutoSubscribe = map.get("--autoSubscribe");
-        Object SubscribeVideoUids = map.get("--subscribeVideoUids");
-        Object SubscribeAudioUids = map.get("--subscribeAudioUids");
-        Object KeepLastFrame = map.get("--keepLastFrame");
-        Object EnableCloudProxy = map.get("--enableCloudProxy");
-        Object EnableIntraRequest = map.get("--enableIntraRequest");
-        Object EnableH265Support = map.get("--enableH265Support");
-        Object LocalAp = map.get("--localAp");
-
-        if (Appid == null || (Uid == null && userAccount == null) || Channel == null || AppliteDir == null) {
-            // print usage
-            String usage = "java RecordingSDK --appId STRING --channel STRING --appliteDir STRING --uid UINTEGER32 --userAccount STRING --channelKey STRING --channelProfile UINTEGER32 --isAudioOnly --isVideoOnly --isMixingEnabled --mixResolution STRING --mixedVideoAudio UINTEGER32 --decryptionMode STRING --secret STRING --idle INTEGER32 --recordFileRootDir STRING --lowUdpPort INTEGER32 --highUdpPort INTEGER32 --getAudioFrame UINTEGER32 --getVideoFrame UINTEGER32 --captureInterval INTEGER32 --cfgFilePath STRING --streamType UINTEGER32 --triggerMode INTEGER32 --proxyType INTEGER32 --proxyServer STRING --audioProfile UINTEGER32 --audioIndicationInterval INTEGER32 --defaultVideoBg STRING --defaultUserBg STRING --logLevel INTEGER32 --layoutMode INTEGER32 --maxResolutionUid INTEGER32 --maxResolutionUserAccount STRING --autoSubscribe --subscribeVideoUids STRING --subscribeAudioUids STRING --keepLastFrame UINTEGER32 --enableCloudProxy --enableIntraRequest --enableH265Support\n\t--appId     (App Id/must)\n\t--channel     (Channel Id/must)\n\t--appliteDir     (directory of app lite 'AgoraCoreService', Must pointer to 'Agora_Recording_SDK_for_Linux_FULL/bin/' folder/must)\n\t--uid     (User Id default is 0/option)\n\t--userAccount     (User account, default uid is used/option)\n\t--channelKey     (channelKey/option)\n\t--channelProfile     (channel_profile:(0:COMMUNICATION),(1:broadcast) default is 0/option)\n\t--isAudioOnly     (Default 0:A/V, 1:AudioOnly (0:1)/option)\n\t--isVideoOnly     (Default 0:A/V, 1:VideoOnly (0:1)/option)\n\t--isMixingEnabled     (Mixing Enable? (0:1)/option)\n\t--mixResolution     (change default resolution for vdieo mix mode/option)\n\t--mixedVideoAudio     (mixVideoAudio:(0:seperated Audio,Video) (1:mixed Audio \u0026 Video with legacy codec) (2:mixed Audio \u0026 Video with new codec), default is 0 /option)\n\t--decryptionMode     (decryption Mode, default is NULL/option)\n\t--secret     (input secret when enable decryptionMode/option)\n\t--idle     (Default 300s, should be above 3s/option)\n\t--recordFileRootDir     (recording file root dir/option)\n\t--lowUdpPort     (default is random value/option)\n\t--highUdpPort     (default is random value/option)\n\t--getAudioFrame     (default 0 (0:save as file, 1:aac frame, 2:pcm frame, 3:mixed pcm frame) (Can't combine with isMixingEnabled) /option)\n\t--getVideoFrame     (default 0 (0:save as file, 1:encoded video frame, eg:h.264,h.265, 2:yuv, 3:jpg buffer, 4:jpg file, 5:jpg file and video file) (Can't combine with isMixingEnabled) /option)\n\t--captureInterval     (default 5 (Video snapshot interval (second)))\n\t--cfgFilePath     (config file path / option)\n\t--streamType     (remote video stream type(0:STREAM_HIGH,1:STREAM_LOW), default is 0/option)\n\t--triggerMode     (triggerMode:(0: automatically mode, 1: manually mode) default is 0/option)\n\t--proxyType     (proxyType:proxyServer format type, 0:self socks5 proxy server, 1:cloud proxy domain, 2:proxy LBS server list. default is 1/option)\n\t--proxyServer     (proxyServer:format proxyType:content, ie: 0:'ip:port', 1:'LBS domain:port', 2:'LBS_ip1,LBS_ip2:port' /option)\n\t--audioProfile     (audio quality: (0: single channelstandard 1: single channel high quality 2:multiple channel high quality)\n\t--audioIndicationInterval     (audioIndicationInterval:(0: no indication, audio indication interval(ms)) default is 0/option)\n\t--defaultVideoBg     (default video background/option)\n\t--defaultUserBg     (default user background/option)\n\t--logLevel     (log level default INFO/option)\n\t--layoutMode     (layoutMode:(0: default layout, 1:bestFit Layout mode, 2:vertical presentation Layout mode) default is 0/option)\n\t--maxResolutionUid     (uid with maxest resolution under vertical presentation Layout mode if uid is used  ( default is -1 /option)\n\t--maxResolutionUserAccount     (user account with maxest resolution under vertical presentation layout mode if userAccount is used ( default is empty /option)\n\t--autoSubscribe     (Auto subscribe video/audio streams of each uid. (0: false 1: true, default 1 /option))\n\t--subscribeVideoUids     (video stream of specific uids. uids seperated by commas, like 1234,2345/option)\n\t--subscribeAudioUids     (audio stream of specific uids. uids sperated by commas, like 1234,2345 /option)\n\t--keepLastFrame     (whether keep user's last video frame when no video stream(0: render user background image or corlor. 2. keep last farme. default is 0))\n\t--enableCloudProxy     (enable cloud proxy or not(0 : not, 1: enable, default 0/option)\n\t--enableIntraRequest     (enable Intra Request or not(0 : not, 1: enable, default 1/option))\n\t--enableH265Support     (enable H.265 video codec or not(0 : not, 1: enable, default 0/option))";
-            System.out.println("Usage:" + usage);
-            return;
-        }
-        appId = String.valueOf(Appid);
-        if (Uid != null)
-            uid = Integer.parseInt(String.valueOf(Uid));
-        if (UserAccount != null)
-            userAccount = String.valueOf(UserAccount);
-        appId = String.valueOf(Appid);
-        name = String.valueOf(Channel);
-        applitePath = String.valueOf(AppliteDir);
-
-        if (ChannelKey != null)
-            channelKey = String.valueOf(ChannelKey);
-        if (ChannelProfile != null)
-            channelProfile = Integer.parseInt(String.valueOf(ChannelProfile));
-        if (!checkEnumValue(channelProfile, 1, "Invalid channel profile value :" + channelProfile)) {
-            return;
-        }
-        if (DecryptionMode != null)
-            decryptionMode = String.valueOf(DecryptionMode);
-        if (Secret != null)
-            secret = String.valueOf(Secret);
-        if (MixResolution != null)
-            mixResolution = String.valueOf(MixResolution);
-        if (Idle != null)
-            idleLimitSec = Integer.parseInt(String.valueOf(Idle));
-        if (RecordFileRootDir != null)
-            recordFileRootDir = String.valueOf(RecordFileRootDir);
-        if (CfgFilePath != null)
-            cfgFilePath = String.valueOf(CfgFilePath);
-        if (LowUdpPort != null)
-            lowUdpPort = Integer.parseInt(String.valueOf(LowUdpPort));
-        if (HighUdpPort != null)
-            highUdpPort = Integer.parseInt(String.valueOf(HighUdpPort));
-        if (IsAudioOnly != null && (Integer.parseInt(String.valueOf(IsAudioOnly)) == 1))
-            isAudioOnly = true;
-        if (KeepLastFrame != null)
-            keepLastFrame = Integer.parseInt(String.valueOf(KeepLastFrame));
-        if (IsVideoOnly != null && (Integer.parseInt(String.valueOf(IsVideoOnly)) == 1))
-            isVideoOnly = true;
-        if (IsMixingEnabled != null && (Integer.parseInt(String.valueOf(IsMixingEnabled)) == 1))
-            isMixingEnabled = true;
-        if (MixedVideoAudio != null)
-            mixedVideoAudio = Integer.parseInt(String.valueOf(MixedVideoAudio));
-        if (!checkEnumValue(mixedVideoAudio, 7, "Invalid mixedVideoAudio :" + mixedVideoAudio)) {
-            return;
-        }
-        if (GetAudioFrame != null)
-            getAudioFrame = Integer.parseInt(String.valueOf(GetAudioFrame));
-        if (!checkEnumValue(getAudioFrame, 3, "Invalid getAudioFrame value : " + getAudioFrame)) {
-            return;
-        }
-        if (GetVideoFrame != null)
-            getVideoFrame = Integer.parseInt(String.valueOf(GetVideoFrame));
-        if (!checkEnumValue(getVideoFrame, 5, "Invalid getVideoFrame value : " + getVideoFrame)) {
-            return;
-        }
-        if (StreamType != null)
-            streamType = Integer.parseInt(String.valueOf(StreamType));
-        if (!checkEnumValue(streamType, 1, "Invalid streamType value : " + streamType)) {
-            return;
-        }
-        if (CaptureInterval != null)
-            captureInterval = Integer.parseInt(String.valueOf(CaptureInterval));
-        if(AudioIndicationInterval != null) audioIndicationInterval = Integer.parseInt(String.valueOf(AudioIndicationInterval));
-        if(TriggerMode != null) triggerMode = Integer.parseInt(String.valueOf(TriggerMode));
-        if(ProxyType != null) proxyType = Integer.parseInt(String.valueOf(ProxyType));
-        if(ProxyServer != null) proxyServer = String.valueOf(ProxyServer);
-        if(AudioProfile != null) audioProfile = Integer.parseInt(String.valueOf(AudioProfile));
-        if(DefaultVideoBg != null) defaultVideoBgPath = String.valueOf(DefaultVideoBg);
-        if(DefaultUserBg != null) defaultUserBgPath = String.valueOf(DefaultUserBg);
-        if(LogLevel != null) logLevel = Integer.parseInt(String.valueOf(LogLevel));
-        if(LayoutMode != null) layoutMode = Integer.parseInt(String.valueOf(LayoutMode));
-        if(MaxResolutionUid != null) maxResolutionUid = Long.parseLong(String.valueOf(MaxResolutionUid));
-        if(MaxResolutionUserAccount != null) maxResolutionUserAccount = String.valueOf(MaxResolutionUserAccount);
-        if(LocalAp != null) localAp = String.valueOf(LocalAp);
-
-        if (userAccount.length() != 0 && maxResolutionUserAccount.length() == 0 && maxResolutionUid != -1 && layoutMode == 2) {
-            System.out.println("maxResolutionUserAccount should be used when join channel with user account");
+        if (request.getAppId() == null || request.getChannel() == null || request.getAppliteDir() == null) {
+            System.out.println("Missing required parameters: appId, channel, appliteDir");
             return;
         }
 
-        if (userAccount.length() == 0 && maxResolutionUid == 0 && maxResolutionUserAccount.length() != 0 && layoutMode == 2) {
-            System.out.println("maxResolutionUid should be used when join channel with uid.");
-            return;
+        String appId = request.getAppId();
+        String channel = request.getChannel();
+        String uid = request.getUid();
+        String channelKey = request.getChannelKey();
+        RecordingConfig config = getRecordingConfig(request);
+
+        // Create the channel
+        if (uid != null && !uid.isEmpty()) {
+            RecordingSDKInstance.createChannelWithUserAccount(appId, channelKey, channel, uid, config, logLevel);
+        } else {
+            RecordingSDKInstance.createChannel(appId, channelKey, channel, 0, config, logLevel);
         }
 
-        if (EnableCloudProxy != null && (Integer.parseInt(String.valueOf(EnableCloudProxy)) == 1))
-            enableCloudProxy = true;
-        //System.out.println(" maxResolutionUid = "+maxResolutionUid);
-        if (AutoSubscribe != null && (Integer.parseInt(String.valueOf(AutoSubscribe)) == 0))
-            autoSubscribe = false;
-        if (EnableIntraRequest != null && (Integer.parseInt(String.valueOf(EnableIntraRequest)) == 0))
-            enableIntraRequest = false;
-        if (EnableH265Support != null && (Integer.parseInt(String.valueOf(EnableH265Support)) == 1))
-            enableH265Support = true;
+        System.out.println("Channel creation completed.");
+    }
 
-        if (!autoSubscribe) {
-            if (SubscribeVideoUids != null) {
-                subscribeVideoUids = String.valueOf(SubscribeVideoUids);
-                String[] struids = subscribeVideoUids.split(",");
-                for (int i = 0; i < struids.length; i++) {
-                    if (userAccount.length() > 0) {
-                        subscribedVideoUserAccount.add(struids[i]);
-                    } else {
-                        try {
-                            subscribedVideoUids.add(Long.parseLong(struids[i]));
-                        } catch (Exception e) {
-                            //Ignore exception here.
-                        }
-                    }
-                }
-            }
-            if (SubscribeAudioUids != null)
-                subscribeAudioUids = String.valueOf(SubscribeAudioUids);
-        }
-
-        if(audioProfile > 2) audioProfile = 2;
-        if(audioProfile < 0) audioProfile = 0;
+    private static RecordingConfig getRecordingConfig(RecordingRequest request) {
+        String appliteDir = request.getAppliteDir();
+        String recordFileRootDir = request.getRecordFileRootDir();
 
         RecordingConfig config = new RecordingConfig();
-        config.channelProfile = CHANNEL_PROFILE_TYPE.values()[channelProfile];
-        config.idleLimitSec = idleLimitSec;
-        config.isVideoOnly = isVideoOnly;
-        config.isAudioOnly = isAudioOnly;
-        config.isMixingEnabled = isMixingEnabled;
-        config.mixResolution = mixResolution;
-        config.mixedVideoAudio = MIXED_AV_CODEC_TYPE.values()[mixedVideoAudio];
-        config.appliteDir = applitePath;
-        config.recordFileRootDir = recordFileRootDir;
-        config.cfgFilePath = cfgFilePath;
-        config.secret = secret;
-        config.decryptionMode = decryptionMode;
-        config.lowUdpPort = lowUdpPort;
-        config.highUdpPort = highUdpPort;
-        config.captureInterval = captureInterval;
-        config.audioIndicationInterval = audioIndicationInterval;
-        config.decodeAudio = AUDIO_FORMAT_TYPE.values()[getAudioFrame];
-        config.decodeVideo = VIDEO_FORMAT_TYPE.values()[getVideoFrame];
-        config.streamType = REMOTE_VIDEO_STREAM_TYPE.values()[streamType];
-        config.triggerMode = triggerMode;
-        config.proxyType = proxyType;
-        config.proxyServer = proxyServer;
-        config.audioProfile = audioProfile;
-        config.defaultVideoBgPath = defaultVideoBgPath;
-        config.defaultUserBgPath = defaultUserBgPath;
-        config.autoSubscribe = autoSubscribe;
-        config.enableCloudProxy = enableCloudProxy;
-        config.enableIntraRequest = enableIntraRequest;
-        config.subscribeVideoUids = subscribeVideoUids;
-        config.subscribeAudioUids = subscribeAudioUids;
-        config.enableH265Support = enableH265Support;
-        config.localAp = localAp;
+        config.setAppliteDir(appliteDir);
+        config.setRecordFileRootDir(recordFileRootDir);
 
-        if (config.decodeVideo == VIDEO_FORMAT_TYPE.VIDEO_FORMAT_ENCODED_FRAME_TYPE) {
-            config.decodeVideo = VIDEO_FORMAT_TYPE.VIDEO_FORMAT_H264_FRAME_TYPE;
-        }
-
-        this.config = config;
-
-        /*
-         * change log_config Facility per your specific purpose like
-         * agora::base::LOCAL5_LOG_FCLT Default:USER_LOG_FCLT.
-         *
-         * ars.setFacility(LOCAL5_LOG_FCLT);
-         */
-
-        //System.out.println(System.getProperty("java.library.path"));
-
-        if(logLevel < 1) logLevel = 1;
-        if(logLevel > 6) logLevel = 6;
-
-        this.isMixMode = isMixingEnabled;
-        this.profile_type = CHANNEL_PROFILE_TYPE.values()[channelProfile];
-        if (isMixingEnabled && !isAudioOnly) {
-            String[] sourceStrArray = mixResolution.split(",");
-            if (sourceStrArray.length != 4) {
-                System.out.println("Illegal resolution:" + mixResolution);
-                return;
-            }
-            this.width = Integer.valueOf(sourceStrArray[0]).intValue();
-            this.height = Integer.valueOf(sourceStrArray[1]).intValue();
-            this.fps = Integer.valueOf(sourceStrArray[2]).intValue();
-            this.kbps = Integer.valueOf(sourceStrArray[3]).intValue();
-        }
-
-        String tmpEnv = System.getenv("KEEPMEDIATIME");
-        if (tmpEnv != null && !tmpEnv.isEmpty()) {
-            keepMediaTime = Integer.parseInt(tmpEnv);
-            System.out.printf("Get system env:KEEPMEDIATIME string:%s, int value:%d\n", tmpEnv, keepMediaTime);
-        } else {
-            System.out.println("No system env:KEEPMEDIATIME");
-        }
-
-        // run jni event loop , or start a new thread to do it
-        cleanTimer = new Timer();
-        if (userAccount.length() > 0) {
-            RecordingSDKInstance.createChannelWithUserAccount(appId, channelKey, name, userAccount, config, logLevel);
-        } else {
-            RecordingSDKInstance.createChannel(appId, channelKey, name, uid, config, logLevel);
-        }
-        cleanTimer.cancel();
-        System.out.println("jni layer has been exited...");
+        config.setIdleLimitSec(60);
+        config.setMixResolution("640,360,15,500");
+        config.setMixingEnabled(true);
+        config.setMixedVideoAudio(MIXED_AV_CODEC_TYPE.AV_CODEC_MIXED_TS_AND_MP4);
+        return config;
     }
 }

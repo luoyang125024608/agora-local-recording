@@ -2,7 +2,9 @@ package io.agora.recording.common;
 
 
 import io.agora.recording.common.Common.*;
+import lombok.Data;
 
+@Data
 public class RecordingConfig {
   public RecordingConfig() {
     isAudioOnly = false;
@@ -11,8 +13,6 @@ public class RecordingConfig {
     mixedVideoAudio = MIXED_AV_CODEC_TYPE.MIXED_AV_DEFAULT;
 
     mixResolution = "";
-    decryptionMode = "";
-    secret = "397abddfe6984ec99f34ee5cd4a8fec0";
     appliteDir = "/home/agora/bin/";
     recordFileRootDir = "/home/agora/tmp/";
     cfgFilePath = "";
@@ -21,9 +21,8 @@ public class RecordingConfig {
     defaultVideoBgPath = "";
     defaultUserBgPath = "";
 
-    lowUdpPort = 40000;//40000;
-    highUdpPort = 41000;//40004;
-    idleLimitSec = 60;
+    lowUdpPort = 40000;
+    highUdpPort = 41000;
     captureInterval = 5;
     triggerMode = 0;
     audioIndicationInterval = 0;

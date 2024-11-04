@@ -4,6 +4,7 @@ import com.example.bean.RecordingRequest;
 import io.agora.recording.RecordingSDK;
 import io.agora.recording.test.RecordingSample;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -41,46 +42,24 @@ public class ApiController {
         try {
             String[] args = new String[]{""};
             //lzz add
-            RecordingSDK RecordingSdk = new RecordingSDK();
-            RecordingSample ars = new RecordingSample(RecordingSdk);
+            RecordingSDK recordingSdk = new RecordingSDK();
+            RecordingSample record = new RecordingSample(recordingSdk);
 
-            String appId = request.getAppId();
-            String channel = request.getChannel();
-            String UID = request.getUid();
-            String channelKey = request.getChannelKey();
+            if(StringUtils.isBlank(request.getChannel())){
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("channel is empty");
+            }
 
-            if(records.containsKey(channel)){
+            if(records.containsKey(request.getChannel())){
                 return ResponseEntity.status(HttpStatus.CONFLICT).body("recording already started");
             }
-            // Create the arguments array
-            args = new String[]{
-                    "--appId", appId,
-                    "--channel", channel,
-                    "--channelKey", channelKey,
-                    "--uid", UID,
-                    "--appliteDir", this.recordingRequest.getAppliteDir(),
-                    "--recordFileRootDir", this.recordingRequest.getRecordFileRootDir(),
-                    "--isMixingEnabled", "1",
-                    "--mixedVideoAudio", "6",
-            };
-            System.out.println("Command line arguments: " + Arrays.toString(args));
-            records.put(channel, ars);
 
+            request.setAppliteDir(this.recordingRequest.getAppliteDir());
+            request.setRecordFileRootDir(this.recordingRequest.getRecordFileRootDir());
+            records.put(request.getChannel(), record);
             // 异步执行录制
-            String[] finalArgs = args;
-            CompletableFuture.runAsync(() -> {
-                // 调用相应的录制服务或启动录制任务
-                ars.createChannel(finalArgs);
-            });
+            record.createChannel(request);
 
-            //判断录制是否成功
-            boolean isStartError = ars.isRecordingError;
-
-            if (!isStartError) {
-                return ResponseEntity.ok("Recording started successfully.");
-            } else {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal Server Error: Recording start failed.");
-            }
+            return ResponseEntity.ok("Recording started successfully.");
 
         } catch (Exception ex) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal Server Error: " + ex.getMessage());

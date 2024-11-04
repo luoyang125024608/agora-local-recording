@@ -9,10 +9,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b88fab67-0261-4c2a-8cbc-f65bad06be6a" name="Changes" comment="run">
+    <list default="true" id="b88fab67-0261-4c2a-8cbc-f65bad06be6a" name="Changes" comment="v1">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/example/bean/RecordingRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/bean/RecordingRequest.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/example/controller/ApiController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/controller/ApiController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/io/agora/recording/RecordingSDK.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/io/agora/recording/RecordingSDK.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/io/agora/recording/common/RecordingConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/io/agora/recording/common/RecordingConfig.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/io/agora/recording/test/RecordingSample.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/io/agora/recording/test/RecordingSample.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -31,6 +33,18 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;luoyang125024608&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/luoyang125024608/agora-local-recording.git&quot;,
+    &quot;accountId&quot;: &quot;6a603be6-530e-4c46-84e9-800ab9086399&quot;
+  }
+}</component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
   </component>
@@ -99,6 +113,33 @@
       <extension name="coverage">
         <pattern>
           <option name="PATTERN" value="com.doda.agora.test.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="RecordingSampleM" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="com.doda.agora.test.RecordingSampleM" />
+      <module name="record" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.doda.agora.test.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Main" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" temporary="true" nameIsGenerated="true">
+      <module name="record" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.example.Main" />
+      <option name="VM_PARAMETERS" value="-Djava.library.path=$PROJECT_DIR$/lib" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.example.*" />
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
@@ -175,7 +216,9 @@
       <workItem from="1705218209035" duration="55453000" />
       <workItem from="1706950344590" duration="10483000" />
       <workItem from="1730336855690" duration="8897000" />
-      <workItem from="1730347065033" duration="22255000" />
+      <workItem from="1730347065033" duration="24250000" />
+      <workItem from="1730453024698" duration="35000" />
+      <workItem from="1730683171216" duration="9370000" />
     </task>
     <task id="LOCAL-00001" summary="run">
       <option name="closed" value="true" />
@@ -185,7 +228,15 @@
       <option name="project" value="LOCAL" />
       <updated>1730354355714</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="v1">
+      <option name="closed" value="true" />
+      <created>1730445063997</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1730445063997</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -206,7 +257,19 @@
     <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="false" />
     <option name="CHECK_NEW_TODO" value="false" />
     <MESSAGE value="run" />
-    <option name="LAST_COMMIT_MESSAGE" value="run" />
+    <MESSAGE value="v1" />
+    <option name="LAST_COMMIT_MESSAGE" value="v1" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/io/agora/recording/test/RecordingSample.java</url>
+          <line>823</line>
+          <option name="timeStamp" value="3" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
