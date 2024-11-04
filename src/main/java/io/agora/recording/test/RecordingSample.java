@@ -52,7 +52,6 @@ class UserInfo{
 
 public class RecordingSample implements RecordingEventHandler {
     // java run status flag
-    private boolean isMixMode = false;
     private int width = 0;
     private int height = 0;
     private int fps = 0;
@@ -97,7 +96,10 @@ public class RecordingSample implements RecordingEventHandler {
     }
 
     private boolean IsMixMode() {
-        return isMixMode;
+        if(this.config == null){
+            return false;
+        }
+        return this.config.isMixingEnabled;
     }
 
     @Override
@@ -805,9 +807,9 @@ public class RecordingSample implements RecordingEventHandler {
         return true;
     }
 
-    @Async
     public void createChannel(RecordingRequest request) {
         int logLevel = 5;
+        String userAccount = "";
         if (request.getAppId() == null || request.getChannel() == null || request.getAppliteDir() == null) {
             System.out.println("Missing required parameters: appId, channel, appliteDir");
             return;
@@ -817,15 +819,16 @@ public class RecordingSample implements RecordingEventHandler {
         String channel = request.getChannel();
         String uid = request.getUid();
         String channelKey = request.getChannelKey();
-        RecordingConfig config = getRecordingConfig(request);
-
+        this.config = getRecordingConfig(request);
+        // run jni event loop , or start a new thread to do it
+        cleanTimer = new Timer();
         // Create the channel
         if (uid != null && !uid.isEmpty()) {
-            RecordingSDKInstance.createChannelWithUserAccount(appId, channelKey, channel, uid, config, logLevel);
-        } else {
-            RecordingSDKInstance.createChannel(appId, channelKey, channel, 0, config, logLevel);
+            RecordingSDKInstance.createChannel(appId, channelKey, channel, Integer.parseInt(uid), config, logLevel);
+        } else if (!userAccount.isEmpty()) {
+            RecordingSDKInstance.createChannelWithUserAccount(appId, channelKey, channel, userAccount, config, logLevel);
         }
-
+        cleanTimer.cancel();
         System.out.println("Channel creation completed.");
     }
 

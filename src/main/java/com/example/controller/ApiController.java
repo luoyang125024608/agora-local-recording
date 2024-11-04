@@ -57,8 +57,9 @@ public class ApiController {
             request.setRecordFileRootDir(this.recordingRequest.getRecordFileRootDir());
             records.put(request.getChannel(), record);
             // 异步执行录制
-            record.createChannel(request);
-
+            CompletableFuture.runAsync(() -> {
+                record.createChannel(request);
+            });
             return ResponseEntity.ok("Recording started successfully.");
 
         } catch (Exception ex) {

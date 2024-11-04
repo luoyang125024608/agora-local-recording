@@ -13,6 +13,8 @@ public class RecordingConfig {
     mixedVideoAudio = MIXED_AV_CODEC_TYPE.MIXED_AV_DEFAULT;
 
     mixResolution = "";
+    decryptionMode = "";
+    secret = "";
     appliteDir = "/home/agora/bin/";
     recordFileRootDir = "/home/agora/tmp/";
     cfgFilePath = "";
@@ -21,8 +23,8 @@ public class RecordingConfig {
     defaultVideoBgPath = "";
     defaultUserBgPath = "";
 
-    lowUdpPort = 40000;
-    highUdpPort = 41000;
+    lowUdpPort = 0;
+    highUdpPort = 0;
     captureInterval = 5;
     triggerMode = 0;
     audioIndicationInterval = 0;
