@@ -9,11 +9,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b88fab67-0261-4c2a-8cbc-f65bad06be6a" name="Changes" comment="v1">
+    <list default="true" id="b88fab67-0261-4c2a-8cbc-f65bad06be6a" name="Changes" comment="简化参数">
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/bean/RestTemplateConfig.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/bean/RecordingRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/bean/RecordingRequest.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/example/controller/ApiController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/controller/ApiController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/io/agora/recording/common/RecordingConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/io/agora/recording/common/RecordingConfig.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/io/agora/recording/test/RecordingSample.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/io/agora/recording/test/RecordingSample.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/application-prod.yml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application-prod.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.yml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -234,7 +237,15 @@
       <option name="project" value="LOCAL" />
       <updated>1730445063997</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="简化参数">
+      <option name="closed" value="true" />
+      <created>1730700794581</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1730700794581</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -256,7 +267,8 @@
     <option name="CHECK_NEW_TODO" value="false" />
     <MESSAGE value="run" />
     <MESSAGE value="v1" />
-    <option name="LAST_COMMIT_MESSAGE" value="v1" />
+    <MESSAGE value="简化参数" />
+    <option name="LAST_COMMIT_MESSAGE" value="简化参数" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

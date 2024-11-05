@@ -4,4 +4,4 @@
 agora:
   appliteDir: /opt/java-app/agora-local-recording/bin
   recordFileRootDir: /opt/java-app/tmp/
-
+  rootDir: /opt

@@ -13,6 +13,7 @@ agora:
   channelProfile: 0
   appliteDir: /home/week/software/agora-local-recording/bin
   recordFileRootDir: /home/week/software/tmp/
+  rootDir: /home/week/software
   lowUdpPort: 40000
   highUdpPort: 44000
   triggerMode: 0

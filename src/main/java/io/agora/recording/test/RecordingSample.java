@@ -29,6 +29,7 @@ import io.agora.recording.RecordingSDK;
 
 
 import io.agora.recording.RecordingEventHandler;
+import lombok.Getter;
 import org.springframework.scheduling.annotation.Async;
 
 class RecordingCleanTimer extends TimerTask {
@@ -56,12 +57,15 @@ public class RecordingSample implements RecordingEventHandler {
     private int height = 0;
     private int fps = 0;
     private int kbps = 0;
+
+    @Getter
     private String storageDir = "./";
     private long aCount = 0;
     private long count = 0;
     private long size = 0;
     private CHANNEL_PROFILE_TYPE profileType;
     Set<Long> m_peers = new HashSet<Long>();
+    @Getter
     private RecordingConfig config = null;
     private RecordingSDK RecordingSDKInstance = null;
     private boolean m_receivingAudio = false;
