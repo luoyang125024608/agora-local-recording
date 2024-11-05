@@ -14,6 +14,9 @@ import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.Resource;
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
@@ -88,7 +91,7 @@ public class ApiController {
                     CompletableFuture.runAsync(() -> {
                         String videoFileName = moveMp4Files(storageDir, hostVideoDir);
                         if (videoFileName != null) {
-                            String poster = moveHostImage(rootDir, hostImage, channel, videoFileName);
+                            String poster = copyHostImage(rootDir, hostImage, channel, videoFileName);
                             saveVideo(channel, request.getHistoryId(), videoPath + videoFileName, poster);
                         }
                     });
@@ -108,25 +111,31 @@ public class ApiController {
         }
     }
 
-    private String moveHostImage(String rootDir, String hostImage, String channel, String videoFileName) {
+    private String copyHostImage(String rootDir, String hostImage, String channel, String videoFileName) {
         File hostImageFile = new File(rootDir + hostImage);
         String path = "/images/host-video-image/" + channel + "/";
+
         // 提取 mp4 文件名的前缀（去掉扩展名）
         String baseName = videoFileName.substring(0, videoFileName.lastIndexOf('.'));
         // 获取图像文件的扩展名（例如 jpg、png）
         String imageExtension = hostImageFile.getName().substring(hostImageFile.getName().lastIndexOf('.'));
         // 使用相同的前缀生成新的图像文件名
         String newImageFileName = baseName + imageExtension;
+
         File destinationDir = new File(rootDir + path);
         if (!destinationDir.exists()) {
             destinationDir.mkdirs();
         }
         File destinationFile = new File(destinationDir, newImageFileName);
-        if (hostImageFile.renameTo(destinationFile)) {
-            System.out.println("Moved file: " + hostImageFile.getAbsolutePath() + " to " + destinationFile.getAbsolutePath());
-        } else {
-            System.out.println("Failed to move file: " + hostImageFile.getAbsolutePath());
+
+        try {
+            Files.copy(hostImageFile.toPath(), destinationFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            System.out.println("Copied file: " + hostImageFile.getAbsolutePath() + " to " + destinationFile.getAbsolutePath());
+        } catch (IOException e) {
+            System.out.println("Failed to copy file: " + hostImageFile.getAbsolutePath());
+            e.printStackTrace();
         }
+
         return path + newImageFileName;
     }
 
